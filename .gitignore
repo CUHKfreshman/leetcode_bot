@@ -1,2 +1,7 @@
 node_modules
-#.env.*
+.env.*
+dist/*
+.venv
+venv
+.env
+__pycache__

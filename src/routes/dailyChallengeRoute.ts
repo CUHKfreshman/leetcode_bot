@@ -3,7 +3,7 @@ import dailyChallengeService from '../services/dailyChallengeService';
 
 const router: Router = Router();
 
-router.get('/dailyChallenge', async (req: Request, res: Response) => {
+router.get('/daily-challenge', async (req: Request, res: Response) => {
   try {
     const dailyChallenge = await dailyChallengeService.getDailyChallenge();
     res.json(dailyChallenge);

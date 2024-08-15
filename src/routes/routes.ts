@@ -7,7 +7,7 @@ export function loadRoutes(app: Application): void {
 
     routeFiles.forEach(file => {
         // skip this file
-        if (file === 'routes.ts') {
+        if (file.split('.')[0] === 'routes') {
             return;
         }
         const route = require(path.join(__dirname, file));
