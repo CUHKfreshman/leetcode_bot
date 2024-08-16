@@ -5,3 +5,11 @@ dist/*
 venv
 .env
 __pycache__
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.ttf
+*.woff

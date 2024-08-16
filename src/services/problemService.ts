@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
-
-interface Problem {
+import { LeetCode, Problem } from 'leetcode-query';
+// this is local interface for Problem in leetcode_data.json, not identical to the one in leetcode-query
+interface ProblemLocal {
     stat: {
         question_id: number;
         question__article__live: string | null;
@@ -24,7 +25,7 @@ interface Problem {
     frequency: number;
     progress: number;
 }
-
+// this is the interface for the data in leetcode_data.json
 interface LeetCodeData {
     user_name: string;
     num_solved: number;
@@ -32,7 +33,7 @@ interface LeetCodeData {
     ac_easy: number;
     ac_medium: number;
     ac_hard: number;
-    stat_status_pairs: Problem[];
+    stat_status_pairs: ProblemLocal[];
     frequency_high: number;
     frequency_mid: number;
     category_slug: string;
@@ -41,8 +42,8 @@ interface LeetCodeData {
 class ProblemService {
   private static instance: ProblemService;
   private leetCodeData: LeetCodeData | null = null;
-  private freeProblems: Problem[] = [];
-
+  private freeProblems: ProblemLocal[] = [];
+  private leetcode: LeetCode | null = null;
   private constructor() {
       // Private constructor to prevent direct construction calls with the `new` operator.
   }
@@ -50,6 +51,7 @@ class ProblemService {
   public static async getInstance(): Promise<ProblemService> {
       if (!ProblemService.instance) {
           ProblemService.instance = new ProblemService();
+          ProblemService.instance.leetcode = new LeetCode();
           await ProblemService.instance.loadData();
       }
       return ProblemService.instance;
@@ -68,16 +70,34 @@ class ProblemService {
       }
   }
 
-  async getProblem(questionId?: number): Promise<Problem | null> {
+  private async queryProblemDetails(slug: string): Promise<Problem | null> {
+        if (!this.leetcode) {
+            throw new Error('LeetCode API not loaded');
+        }
+        try {
+            const problem = await this.leetcode.problem(slug);
+            return problem;
+        } catch (error) {
+            console.error('Error fetching problem details:', error);
+            return null;
+        }
+    }
+  async getProblem(frontendQuestionId?: number): Promise<Problem | null> {
       if (!this.leetCodeData) {
           throw new Error('LeetCode data not loaded');
       }
-
-      if (questionId) {
-          return this.leetCodeData.stat_status_pairs.find(problem => problem.stat.question_id === questionId) || null;
+      let randomProblem: ProblemLocal | null = null;
+      if (frontendQuestionId) {
+          randomProblem = this.leetCodeData.stat_status_pairs.find(problem => problem.stat.frontend_question_id === frontendQuestionId) || null;
       } else {
-          return this.freeProblems[Math.floor(Math.random() * this.freeProblems.length)] || null;
+          randomProblem = this.freeProblems[Math.floor(Math.random() * this.freeProblems.length)] || null;
       }
+      if( randomProblem === null) {
+        throw new Error('Failed to fetch problem!');
+    }
+      // now query the problem details by slug
+      return await this.queryProblemDetails(randomProblem.stat.question__title_slug);
+
   }
 }
 
