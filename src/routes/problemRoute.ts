@@ -17,5 +17,23 @@ router.get('/problem/:id?', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to fetch problem' });
     }
 });
+router.get('/total-problems/', async (req: Request, res: Response) => {
+    try {
+        const problemService = await ProblemService.getInstance();
+        const count = await problemService.getProblemTotalNumber();
+        res.json({ 'total': count });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch problem count' });
+    }
+});
+router.get('/daily-challenge', async (req: Request, res: Response) => {
+  try {
+    const problemService = await ProblemService.getInstance();
+    const dailyChallenge = await problemService.getDailyChallenge();
+    res.json(dailyChallenge);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch daily challenge!' });
+  }
+});
 
 export default router;

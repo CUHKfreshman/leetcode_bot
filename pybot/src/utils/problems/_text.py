@@ -1,5 +1,6 @@
 from html import unescape
 import re
+import json
 # texts
 
 RANDOM_APPELLATION = ["大哥哥", "小哥哥", "大姐姐", "小姐姐", "大佬", "小可爱", "大可爱", "小宝贝", "大宝贝", "小天使", "大天使", "小可爱", "大可爱", "小宝贝", "大宝贝", "小天使", "大天使"]
@@ -9,11 +10,11 @@ RANDOM_ENDINGS = ["加油啊，{appellation}~ ^_^", "加油吧，{appellation}�
 TAG_PATTERN = re.compile('<[^<]+?>')
 # Global compiled patterns
 SPECIAL_HEADERS = {
-    'en': re.compile(r'^(Example \d+:|Constraints:|Follow-up:|Note:)'),
+    'en': re.compile(r'^(Example\s*\d*:|Constraints:|Follow-up:|Note:)'),
     'cn': re.compile(r'^(示例\s*\d*：|提示：|后续问题：|说明：)')
 }
 BOLD_PATTERN = {
-    'en': re.compile(r'(Example \d+:|Constraints:|Follow-up:|Note:)'),
+    'en': re.compile(r'(Example\s*\d*:|Constraints:|Follow-up:|Note:)'),
     # note that the Chinese pattern is actually different
     # this is because SPECIAL HEADERS is matched before string cleaning, but BOLD_PATTERN is matched after string cleaning
     'cn': re.compile(r'(示例\d*：|提示：|后续问题：|说明：)')
@@ -94,3 +95,5 @@ def get_problem_body(data: dict, language='en') -> tuple:
         title = data['title']
         content = clean_string(data['content'], language='en')
     return title, content
+
+    
