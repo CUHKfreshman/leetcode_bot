@@ -22,13 +22,29 @@ QQ_BOTS='[
         } 
     }
 ]'
-6. Fill in env for your production & dev respectively.
+```
+6. Fill in .env.{your_env} for your production & dev respectively.
 ```
 LOG_LEVEL = ...
 REDIRECT_BASE_URL = ""
 NODE_SERVER_BASE_URL = ""
 LLM_API_KEY = ""
-```
+FONT_PATHS = "{
+    'en': {
+        'regular': "",
+        'bold': "",
+        'title': ""
+    },
+    'cn': {
+        'regular': "",
+        'bold': "",
+        'title': ""
+    }
+}"
+BOT_NAME = "{
+    "rp": "",
+    "solver": ""
+}"
 ```
 ## Documentation
 

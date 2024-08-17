@@ -1,1 +1,1 @@
-from ._chat import get_llm_response_json
+from ._chat import get_llm_response

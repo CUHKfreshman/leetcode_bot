@@ -39,8 +39,20 @@ CHINESE_CHAR_PATTERN = re.compile(r'[\u4e00-\u9fff]+')
 
 def break_sentence_to_words(text: str, language='en') -> list:
     if language == 'en':
-        # Split by space
-        return text.split()
+        # before split by space, we need to consider if text is code block
+        # if it is, we should not split by space for leading spaces
+        # for others, we can split by space
+        # Split the text into lines
+        words = []
+        # Check if the line is part of a code block (starts with spaces or tabs)
+        if re.match(r'^\s+', text):
+            # For code blocks, keep leading spaces intact
+            words.extend(re.findall(r'\S+|\s+', text))
+        else:
+            # For regular text, split by spaces
+            words.extend(text.split())
+        
+        return words
     # Remove spaces
     text = text.replace(' ', '')
     # Split by chinese characters, 
@@ -70,6 +82,8 @@ def break_sentence_to_words(text: str, language='en') -> list:
     return words
 
 def clean_string(input_string: str, language='en') -> str:
+    # gpt send real '\n' instead of \n, so we need to replace it
+    input_string = input_string.replace('\\n', '\n')
     # Use html.unescape instead of html.parser.unescape
     input_string = unescape(input_string)
     for old, new in REPLACEMENTS['before_tag_removal'].items():

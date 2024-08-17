@@ -1,7 +1,8 @@
 from PIL import Image, ImageDraw, ImageFont
-import re
 from ._text import break_sentence_to_words, SPECIAL_HEADERS, BOLD_PATTERN
-# font path
+from nonebot import get_driver
+config = get_driver().config
+# Define the paths in .env file. If not defined, use the default paths.
 FONT_PATHS = {
     'en': {
         'regular': "./src/data/fonts/en/Urbanist-Regular.ttf",
@@ -69,7 +70,7 @@ def image_text_wrap(text: str, font: ImageFont.FreeTypeFont, max_width: int, lan
         # if paragraph is 'Example {number}:' or 'Explanation:' or ..., leading_spaces = 0
         leading_spaces = 0 if SPECIAL_HEADERS[language].match(paragraph) else 2
         words_separate_space = 0 if language == 'cn' else font.getbbox(' ')[2]
-        paragraph = paragraph.strip()
+        #paragraph = paragraph.strip()
         words = break_sentence_to_words(paragraph, language)
         current_line = []
         current_width = 0
