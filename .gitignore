@@ -11,5 +11,5 @@ __pycache__
 *.gif
 *.svg
 *.ico
-*.ttf
-*.woff
+#*.ttf
+#*.woff

@@ -1,16 +1,25 @@
 from PIL import Image, ImageDraw, ImageFont
-import textwrap
-import random
 import re
-FONT_PATH = "/var/www/leetcode_bot/pybot/src/data/fonts/Urbanist-Regular.ttf"#"/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-BOLD_FONT_PATH = "/var/www/leetcode_bot/pybot/src/data/fonts/Urbanist-Bold.ttf"#"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-TITLE_FONT_PATH = "/var/www/leetcode_bot/pybot/src/data/fonts/Urbanist-Black.ttf"#"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-def create_image_from_text(title, content, max_width=800, max_height=1000, font_size=20):
-    font = ImageFont.truetype(FONT_PATH, font_size)
-    bold_font = ImageFont.truetype(BOLD_FONT_PATH, font_size)
-    title_font = ImageFont.truetype(TITLE_FONT_PATH, font_size + 15)
+from ._text import break_sentence_to_words, SPECIAL_HEADERS, BOLD_PATTERN
+# font path
+FONT_PATHS = {
+    'en': {
+        'regular': "./src/data/fonts/en/Urbanist-Regular.ttf",
+        'bold': "./src/data/fonts/en/Urbanist-Bold.ttf",
+        'title': "./src/data/fonts/en/Urbanist-Black.ttf"
+    },
+    'cn': {
+        'regular': "./src/data/fonts/cn/NotoSansSC-Regular.ttf",
+        'bold': "./src/data/fonts/cn/NotoSansSC-Bold.ttf",
+        'title': "./src/data/fonts/cn/NotoSansSC-Black.ttf"
+    }
+}
+def create_image_from_text(title: str, content: str, language='en',max_width=800, max_height=1000, font_size=20):
+    regular_font = ImageFont.truetype(FONT_PATHS[language]["regular"], font_size)
+    bold_font = ImageFont.truetype(FONT_PATHS[language]["bold"], font_size)
+    title_font = ImageFont.truetype(FONT_PATHS[language]["title"], font_size + 15)
 
-    title = title.upper()    
+    title = title.upper()
     # Calculate the width of the title text using font.getbbox()
     title_bbox = title_font.getbbox(title)
     title_width = title_bbox[2] - title_bbox[0]
@@ -19,7 +28,7 @@ def create_image_from_text(title, content, max_width=800, max_height=1000, font_
     if title_width > max_width:
         max_width = title_width + 40
     # Calculate the height of image based on content
-    lines = improved_wrap(content, font, max_width - 40)
+    lines = image_text_wrap(content, regular_font, max_width - 40, language)
     # not using line_height here because there are extra spaces between lines
     content_height = len(lines) * (font_size + 5) + title_height
     max_height = content_height + 100
@@ -39,11 +48,11 @@ def create_image_from_text(title, content, max_width=800, max_height=1000, font_
     
     y_text = 80
     for line in lines:
-        ## if line is 'Example {number}:' or 'Explanation:' or 'Constraints:', make it bold
-        if re.match(r'Example \d+:|Explanation:|Constraints:', line):
+        ## if line is 'Example {number}:' or 'Explanation:' or..., use bold font
+        if BOLD_PATTERN[language].match(line):
             d.text((20, y_text), line, font=bold_font, fill=(0, 0, 0))
         else:
-            d.text((20, y_text), line, font=font, fill=(0, 0, 0))
+            d.text((20, y_text), line, font=regular_font, fill=(0, 0, 0))
         y_text += font_size + 5
 
     #img = img.crop((0, 0, max_width, y_text + 30))
@@ -51,17 +60,17 @@ def create_image_from_text(title, content, max_width=800, max_height=1000, font_
     
     return img
 
-def improved_wrap(text, font, max_width):
+def image_text_wrap(text: str, font: ImageFont.FreeTypeFont, max_width: int, language='en') -> list:
     lines = []
-    # for 'Example {number}:' or 'Explanation:' or 'Constraints:', add \n to the end
-    text = re.sub(r'(Example \d+:|Explanation:|Constraints:)', r'\1\n', text)
+    # Split the text into paragraphs
+    # text = BOLD_PATTERN[language].sub(r'\1\n', text)
     paragraphs = text.split('\n')
-
     for i, paragraph in enumerate(paragraphs):
-        # if paragraph is 'Example {number}:' or 'Explanation:' or 'Constraints:', leading_spaces = 0
-        leading_spaces = 0 if re.match(r'Example \d+:|Explanation:|Constraints:', paragraph) else 2
+        # if paragraph is 'Example {number}:' or 'Explanation:' or ..., leading_spaces = 0
+        leading_spaces = 0 if SPECIAL_HEADERS[language].match(paragraph) else 2
+        words_separate_space = 0 if language == 'cn' else font.getbbox(' ')[2]
         paragraph = paragraph.strip()
-        words = paragraph.split()
+        words = break_sentence_to_words(paragraph, language)
         current_line = []
         current_width = 0
         # Add a blank line between paragraphs
@@ -74,14 +83,16 @@ def improved_wrap(text, font, max_width):
             word_width = font.getbbox(word)[2]
             if current_width + word_width <= max_width:
                 current_line.append(word)
-                current_width += word_width + font.getbbox(' ')[2]  # Add space width
+                current_width += word_width + words_separate_space  # Add space width
             else:
-                lines.append(' '.join(current_line))
+                current_line_text = ''.join(current_line) if language == 'cn' else ' '.join(current_line)
+                lines.append(current_line_text)
                 current_line = [word]
                 current_width = word_width
 
         if current_line:
-            lines.append(' '.join(current_line))
+            current_line_text = ''.join(current_line) if language == 'cn' else ' '.join(current_line)
+            lines.append(current_line_text)
 
     return lines
 
