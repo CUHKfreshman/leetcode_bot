@@ -37,53 +37,52 @@ REPLACEMENTS = {
 CHINESE_PUNCTUATION = '，。、；：？！“”‘’（）【】《》—…'
 CHINESE_CHAR_PATTERN = re.compile(r'[\u4e00-\u9fff]+')
 
+def is_chinese_char(char):
+    # This function checks if a character is Chinese
+    return '\u4e00' <= char <= '\u9fff' or char in CHINESE_PUNCTUATION
 def break_sentence_to_words(text: str, language='en') -> list:
-    if language == 'en':
-        # before split by space, we need to consider if text is code block
-        # if it is, we should not split by space for leading spaces
-        # for others, we can split by space
-        # Split the text into lines
-        words = []
-        # Check if the line is part of a code block (starts with spaces or tabs)
-        if re.match(r'^\s+', text):
-            # For code blocks, keep leading spaces intact
-            words.extend(re.findall(r'\S+|\s+', text))
-        else:
-            # For regular text, split by spaces
-            words.extend(text.split())
-        
-        return words
-    # Remove spaces
-    text = text.replace(' ', '')
-    # Split by chinese characters, 
-    # typically we do not split character with punctuation, but we can add it if needed
-
-    # there are also other chars in the text, need to keep them as well
-    # For Chinese, we'll process character by character
     words = []
-    current_word = ''
-    
-    for char in text:
-        if CHINESE_CHAR_PATTERN.match(char):
-            # If it's a Chinese character and we have a current word, add it to words
-            if current_word:
-                words.append(current_word)
+    # Check if the line is part of a code block (starts with spaces or tabs)
+    if re.match(r'^\s+', text):
+        # For code blocks, keep leading spaces only for the first word
+        first_word = re.match(r'^\s+\S+', text)
+        if first_word:
+            # Keep original length of space but format it as " " * n
+            space_num = len(first_word.group()) - len(first_word.group().lstrip())
+            words.append(' ' * space_num + first_word.group().lstrip())
+            remaining_text = text[first_word.end():]
+            words.extend(remaining_text.split())
+    else:
+        # For regular text, split by spaces
+        words.extend(text.split())
+    if language == 'en':
+        return words
+    if language == 'cn':
+        processed_words = []
+        for idx, word in enumerate(words):
+            if any('\u4e00' <= char <= '\u9fff' for char in word):
+                # If the word contains Chinese characters
                 current_word = ''
-            # Add the Chinese character as a separate word
-            words.append(char)
-        else:
-            # For non-Chinese characters, we accumulate them
-            current_word += char
-    
-    # Add any remaining characters in current_word
-    if current_word:
-        words.append(current_word)
-    
-    return words
-
+                for char in word:
+                    if '\u4e00' <= char <= '\u9fff':
+                        # If it's a Chinese character
+                        if current_word:
+                            processed_words.append(current_word)
+                            current_word = ''
+                        processed_words.append(char)
+                    else:
+                        current_word += char
+                if current_word:
+                    processed_words.append(current_word)
+            else:
+                processed_words.append(word)
+        return processed_words
+    else:
+        raise ValueError(f"Invalid language: {language}")
 def clean_string(input_string: str, language='en') -> str:
+    #print(input_string)
     # gpt send real '\n' instead of \n, so we need to replace it
-    input_string = input_string.replace('\\n', '\n')
+    #input_string = input_string.replace('\\n', '\n')
     # Use html.unescape instead of html.parser.unescape
     input_string = unescape(input_string)
     for old, new in REPLACEMENTS['before_tag_removal'].items():

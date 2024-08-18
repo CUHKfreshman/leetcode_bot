@@ -7,11 +7,11 @@ import datetime
 from ..utils import fetch_problem, fetch_problems_total_number, get_problem_body, create_image_from_text
 from ..utils import REDIRECT_BASE_URL, RANDOM_APPELLATION, RANDOM_ENDINGS
 
-problem = on_command("今天做什么", aliases={"随机","random","problem","题目","速速端上来罢"},priority=2,block=True)
+problem = on_command("今天做什么", aliases={"随机","random","problem","题目","速速端上来罢"},priority=2,block=True, force_whitespace=True)
 # data json is in ../data/leetcode_data.json
 TOTAL_PROBLEMS = fetch_problems_total_number()
 last_updated = datetime.date.today()
-def randomly_choose_language(p=0.05):
+def randomly_choose_language(p=0.01):
     return 'cn' if random.random() > p else 'en'
 def generate_welcome_message(language:str, question_number:int, short_url:str, user_indicate_number:bool, user_indicate_language:bool) -> str:
     text = ""

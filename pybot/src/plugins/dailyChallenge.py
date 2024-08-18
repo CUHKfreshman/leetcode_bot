@@ -6,7 +6,7 @@ import random
 import datetime
 from ..utils import create_image_from_text, fetch_daily_challenge, get_problem_body
 from ..utils import REDIRECT_BASE_URL, RANDOM_ENDINGS, RANDOM_APPELLATION
-dailyChallenge = on_command("每日挑战", aliases={"每日大赛","daily", "daily-challenge"},priority=1,block=True)
+dailyChallenge = on_command("每日挑战", aliases={"每日大赛","daily", "daily-challenge"},priority=1,block=True, force_whitespace=True)
 # BUFFER
 img_buffer = {
     'cn': BytesIO(),

@@ -4,7 +4,8 @@
   "description": "Bot for everyday Leetcode problems",
   "main": "src/index.js",
   "scripts": {
-    "start": "node -r dotenv/config dist/index.js dotenv_config_path=.env.production",
+    "start": "pm2 start ecosystem.config.js --env production",
+    "stop": "pm2 stop ecosystem.config.js",
     "copy-assets": "cp -R src/data dist/",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc && npm run copy-assets"
