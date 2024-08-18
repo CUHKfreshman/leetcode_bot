@@ -1,6 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont 
 from nonebot import get_driver
-
+from ..other._eval import timeit
 from ._text import break_sentence_to_words,is_chinese_char
 from ._text import SPECIAL_HEADERS, BOLD_PATTERN
 config = get_driver().config
@@ -35,6 +35,7 @@ THEME_COLORS = {
         "code": (51, 65, 85)
     }
 }
+@timeit
 def create_image_from_text(title: str, content: str, language='en',max_width=800, max_height=1000, font_size=20):
     regular_font = ImageFont.truetype(FONT_PATHS[language]["regular"], font_size)
     bold_font = ImageFont.truetype(FONT_PATHS[language]["bold"], font_size)

@@ -1,2 +1,2 @@
-from .problems import *
+from .problem import *
 from .llm import *

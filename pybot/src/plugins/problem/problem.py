@@ -4,8 +4,8 @@ from nonebot.params import CommandArg
 from io import BytesIO
 import random
 import datetime
-from ..utils import fetch_problem, fetch_problems_total_number, get_problem_body, create_image_from_text
-from ..utils import REDIRECT_BASE_URL, RANDOM_APPELLATION, RANDOM_ENDINGS
+from ...utils import fetch_problem, fetch_problems_total_number, get_problem_body, create_image_from_text
+from ...utils import REDIRECT_BASE_URL, RANDOM_APPELLATION, RANDOM_ENDINGS
 
 problem = on_command("今天做什么", aliases={"随机","random","problem","题目","速速端上来罢"},priority=2,block=True, force_whitespace=True)
 # data json is in ../data/leetcode_data.json
@@ -29,9 +29,7 @@ def generate_welcome_message(language:str, question_number:int, short_url:str, u
 async def get_problem(event: MessageEvent, args:Message = CommandArg()):
     global last_updated, TOTAL_PROBLEMS
     user_query = event.get_plaintext()
-    if user_query[0] == '/':
-        user_query = user_query[1:]
-    if user_query.startswith("problem") or user_query.startswith("random"):
+    if "problem" in user_query or "random" in user_query:
         user_indicate_language = True
         language = 'en'
     else:

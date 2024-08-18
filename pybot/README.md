@@ -29,22 +29,12 @@ LOG_LEVEL = ...
 REDIRECT_BASE_URL = ""
 NODE_SERVER_BASE_URL = ""
 LLM_API_KEY = ""
-FONT_PATHS = "{
-    'en': {
-        'regular': "",
-        'bold': "",
-        'title': ""
-    },
-    'cn': {
-        'regular': "",
-        'bold': "",
-        'title': ""
-    }
-}"
-BOT_NAME = "{
-    "rp": "",
-    "solver": ""
-}"
+LLM_COST_THRESHOLD = # max cost for this run
+LLM_API_NUM_TRIES = # retry number if no proper response received 
+RP_BOT_NAME = ""
+RP_BOT_COST_PER_QUERY = # cost per query
+SOLVER_BOT_NAME = ""
+SOLVER_BOT_COST_PER_QUERY = # cost per query
 ```
 ## Documentation
 
