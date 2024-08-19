@@ -12,7 +12,7 @@ This project consists of two main components:
 2. Trigger tasks by natural language; Auto-switch mini/heavy LLM models for different tasks (roleplay/problem solving).
 
 ## Note
-Currenty bot relies on Nonebot QQ adaptor to function properly. Modify code to migrate to your designated platform.
+Currenty bot relies on Nonebot QQ adapter to function properly. Modify code to migrate to your designated platform.
 
 ---
 # LeetCode LLM 机器人

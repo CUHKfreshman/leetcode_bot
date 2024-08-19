@@ -26,7 +26,7 @@ router.get('/total-problems/', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to fetch problem count' });
     }
 });
-router.get('/daily-challenge', async (req: Request, res: Response) => {
+router.get('/daily-challenge/', async (req: Request, res: Response) => {
   try {
     const problemService = await ProblemService.getInstance();
     const dailyChallenge = await problemService.getDailyChallenge();

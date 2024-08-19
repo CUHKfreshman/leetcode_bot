@@ -19,37 +19,41 @@ async def handle_dm(event: MessageEvent):
     logger.debug(f"**************************")
     logger.debug(f"Received message: {request_text}")
     logger.debug(f"User ID: {event.get_user_id()}")
-    response = await get_llm_response(request_text, "json", "rp")
-    if response:
-        task = response.get("task", "")
-        questionId = response.get("questionId", "")
-        reply = response.get("reply", "")
-        logger.debug(f"Task: {task}, Question ID: {questionId}, Reply: {reply}")
-        # if task
-        if reply:
-            logger.debug(f"sending reply: {reply}")
-            await llm_chat.send(reply)
-        if task in ALLOWED_TASKS:
-            # if help task, get better llm to help
-            if task == "help":
-                response = await get_llm_response(request_text, "img", "solver")
-                if response:
-                    img_buffer = BytesIO()
-                    response.save(img_buffer, format="PNG")
-                    text = "帮你问到了哦，来看看吧~"
-                    msg = Message([MessageSegment.text(text), MessageSegment.file_image(img_buffer.getvalue())])
-                    await llm_chat.finish(msg)
-                else:
-                    await llm_chat.finish(Message("我哥不在哦，等会再问问吧~"))
-            else:
-                # hack
-                event.__setattr__("_message",Message(task))
-                if task in ("daily", "每日挑战"):
-                    await get_daily_challenge(event)
-                elif task in ("problem","题目"):
-                    await get_problem(event, Message(questionId))
-    else:
-        await llm_chat.finish(Message("好像听不懂呢~"))
+    try:
+        response = await get_llm_response(request_text, "json", "rp")
+        logger.debug(f"RP Response: {response}")
+        if response:
+            task = response.get("task", "")
+            questionId = response.get("questionId", "")
+            reply = response.get("reply", "")
 
+            # if task
+            if reply:
+                logger.debug(f"sending reply: {reply}")
+                await llm_chat.send(reply)
+            if task in ALLOWED_TASKS:
+                # if help task, get better llm to help
+                if task == "help":
+                    response = await get_llm_response(request_text, "img", "solver")
+                    if response:
+                        img_buffer = BytesIO()
+                        response.save(img_buffer, format="PNG")
+                        text = "帮你问到了哦，来看看吧~"
+                        msg = Message([MessageSegment.text(text), MessageSegment.file_image(img_buffer.getvalue())])
+                        await llm_chat.finish(msg)
+                    else:
+                        await llm_chat.finish(Message("我哥不在哦，等会再问问吧~"))
+                else:
+                    # this is hack, just to make life easier
+                    event.__setattr__("_message",Message(task))
+                    if task in ("daily", "每日挑战"):
+                        await get_daily_challenge(event)
+                    elif task in ("problem","题目"):
+                        await get_problem(event, Message(questionId))
+        else:
+            await llm_chat.finish(Message("好像听不懂呢~"))
+    except Exception as e:
+        logger.error(f"Failed to get llm response due to {e}")
+        await llm_chat.finish(Message("哎哟，信号不好，等下再试试吧~"))
 
 

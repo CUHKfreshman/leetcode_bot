@@ -28,18 +28,18 @@ def generate_welcome_message(language:str, question_number:int, short_url:str, u
 @problem.handle()
 async def get_problem(event: MessageEvent, args:Message = CommandArg()):
     global last_updated, TOTAL_PROBLEMS
-    user_query = event.get_plaintext()
-    if "problem" in user_query or "random" in user_query:
-        user_indicate_language = True
-        language = 'en'
-    else:
-        user_indicate_language = False
-        language = randomly_choose_language()
-    # if user indicated a problem number, then fetch that problem
-    # if not, fetch a random problem
-    question_number = args.extract_plain_text()
-    if question_number:
-        try:
+    try:
+        user_query = event.get_plaintext()
+        if "problem" in user_query or "random" in user_query:
+            user_indicate_language = True
+            language = 'en'
+        else:
+            user_indicate_language = False
+            language = randomly_choose_language()
+        # if user indicated a problem number, then fetch that problem
+        # if not, fetch a random problem
+        question_number = args.extract_plain_text()
+        if question_number:
             question_number = int(question_number)
             if last_updated != datetime.date.today():
                 TOTAL_PROBLEMS = fetch_problems_total_number()
@@ -48,24 +48,23 @@ async def get_problem(event: MessageEvent, args:Message = CommandArg()):
                 else:
                     last_updated = datetime.date.today()
             if question_number < 1 or question_number > TOTAL_PROBLEMS:
-                raise ValueError
-        except ValueError:
-            await problem.send(f"诶，得输入一个1到{TOTAL_PROBLEMS}之间的数字呢~")
-            return
-    data = fetch_problem(question_number)
-    if data is not None:
-        title, content = get_problem_body(data, language)
-        title_slug = data['titleSlug']
-        short_url = f"{REDIRECT_BASE_URL}/problems/{title_slug}"
-        
-        img_buffer = BytesIO()
-        # Create image from text
-        img = create_image_from_text(title, content, language)
-        img.save(img_buffer, format="PNG")
-        text = generate_welcome_message(language, data['questionFrontendId'], short_url, bool(question_number),user_indicate_language)
-        msg = Message([MessageSegment.text(text), MessageSegment.file_image(img_buffer.getvalue())])
-        # Send the image
-        await problem.send(msg)
-    else:
-        logger.error(f"Failed to fetch problem {question_number} because of network error")
+                raise ValueError(f"Invalid question number {question_number}")
+        data = fetch_problem(question_number)
+        if data is not None:
+            title, content = get_problem_body(data, language)
+            title_slug = data['titleSlug']
+            short_url = f"{REDIRECT_BASE_URL}/problems/{title_slug}"
+            img_buffer = BytesIO()
+            # Create image from text
+            img = create_image_from_text(title, content, language)
+            img.save(img_buffer, format="PNG")
+            text = generate_welcome_message(language, data['questionFrontendId'], short_url, bool(question_number),user_indicate_language)
+            msg = Message([MessageSegment.text(text), MessageSegment.file_image(img_buffer.getvalue())])
+            # Send the image
+            await problem.send(msg)
+    except ValueError as e:
+        logger.error(f"Failed to fetch problem {question_number} due to {e}")
+        await problem.finish(f"诶，得输入一个1到{TOTAL_PROBLEMS}之间的数字呢~")
+    except Exception as e:
+        logger.error(f"Failed to fetch problem {question_number} due to {e}")
         await problem.send("哎哟，网卡了，等下再试试吧~")

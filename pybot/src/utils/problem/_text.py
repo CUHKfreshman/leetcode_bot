@@ -4,7 +4,7 @@ import json
 # texts
 
 RANDOM_APPELLATION = ["大哥哥", "小哥哥", "大姐姐", "小姐姐", "大佬", "小可爱", "大可爱", "小宝贝", "大宝贝", "小天使", "大天使", "小可爱", "大可爱", "小宝贝", "大宝贝", "小天使", "大天使"]
-RANDOM_ENDINGS = ["加油啊，{appellation}~ ^_^", "加油吧，{appellation}。。", "⭐加油，{appellation}！⭐", "加油哦，{appellation}？❤"]
+RANDOM_ENDINGS = ["加油啊，{appellation}~ ^_^", "加油吧，{appellation}...", "⭐加油，{appellation}！⭐", "加油哦，{appellation}？❤"]
 
 # Compile regex pattern only once
 TAG_PATTERN = re.compile('<[^<]+?>')
