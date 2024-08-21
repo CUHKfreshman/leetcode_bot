@@ -56,4 +56,4 @@ async def get_daily_challenge(event: MessageEvent, args:Message = CommandArg()):
         await dailyChallenge.send(msg)
     except Exception as e:
         logger.error(f"Failed to fetch daily challenge due to {e}")
-        await dailyChallenge.finish("哎哟，网卡了，等下再试试吧~")
+        await dailyChallenge.send("哎哟，网卡了，等下再试试吧~")

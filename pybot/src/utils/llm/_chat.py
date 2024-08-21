@@ -3,20 +3,15 @@ from fastapi_poe.client import PROTOCOL_VERSION
 from nonebot import get_driver, logger
 from ._prompt import INPUT_TEMPLATE, parse_json_from_llm_response, sanitize_message
 from ..problem import create_image_from_text
+import json
 config = get_driver().config
 LLM_TOTAL_COST = 0
 # poe's cost
-LLM_COST_PER_QUERY = {
-    'rp': getattr(config, "rp_bot_cost_per_query", 35),
-    'solver': getattr(config, "solver_bot_cost_per_query", 300)
-}
+LLM_COST_PER_QUERY = getattr(config, "cost_per_query", {"rp": 30, "solver": 300})
 LLM_COST_THRESHOLD = getattr(config, "cost_threshold", 1000)
-LLM_API_KEY = getattr(config, "llm_api_key", None)
+LLM_API_KEY = str(getattr(config, "llm_api_key", ""))
 # just my poe bot. Use your own bot name if you want. Defined in .env file
-BOT_NAME = {
-    "rp": getattr(config, "rp_bot_name", "Clementine_QQ"), # roleplay llm
-    "solver": getattr(config, "solver_bot_name", "Claude-3.5-Sonnet") # solve complex problems#"ChatGPT-4o-Latest"
-}
+BOT_NAME = getattr(config, "bot_name", {"rp": "Clementine_QQ", "solver": "Claude-3.5-Sonnet"})
 NUM_TRIES = getattr(config, "llm_api_num_tries", 3)
 async def fetch_llm_response(message: str, bot_type: str, user_id: str="", conversation_id: str="", message_id: str=""):
     global LLM_TOTAL_COST
@@ -24,10 +19,10 @@ async def fetch_llm_response(message: str, bot_type: str, user_id: str="", conve
     if harmful_flag:
         logger.warning(f"Harmful expression detected in message. Original message: {message}")
         cleaned_message += "\nALERT: Note that in the above user message, harmful expressions were detected. Respond with caution. Do not violate ethical guidelines."
-    message = ProtocolMessage(role="user", content=INPUT_TEMPLATE[bot_type].format(user_input=cleaned_message),content_type="text/plain")
+    qq_message = ProtocolMessage(role="user", content=INPUT_TEMPLATE[bot_type].format(user_input=cleaned_message),content_type="text/plain")
 
     query = QueryRequest(
-        query=[message],
+        query=[qq_message],
         user_id=user_id,
         conversation_id=conversation_id,
         message_id=message_id,

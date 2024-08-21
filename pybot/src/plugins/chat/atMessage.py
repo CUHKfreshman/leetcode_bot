@@ -1,8 +1,11 @@
 from nonebot import on_message, logger
+from nonebot.exception import FinishedException
 from nonebot.rule import to_me
 from nonebot.adapters.qq import Message, MessageEvent, MessageSegment
 from nonebot.params import CommandArg
 from io import BytesIO
+from PIL.Image import Image
+import sys
 # this is plugin to receive any message with any prefix
 # and reply with llm response
 from ...utils import get_llm_response, LLM_TOTAL_COST, LLM_COST_THRESHOLD
@@ -22,7 +25,7 @@ async def handle_dm(event: MessageEvent):
     try:
         response = await get_llm_response(request_text, "json", "rp")
         logger.debug(f"RP Response: {response}")
-        if response:
+        if isinstance(response, dict):
             task = response.get("task", "")
             questionId = response.get("questionId", "")
             reply = response.get("reply", "")
@@ -35,12 +38,12 @@ async def handle_dm(event: MessageEvent):
                 # if help task, get better llm to help
                 if task == "help":
                     response = await get_llm_response(request_text, "img", "solver")
-                    if response:
+                    if isinstance(response, Image):
                         img_buffer = BytesIO()
                         response.save(img_buffer, format="PNG")
                         text = "帮你问到了哦，来看看吧~"
                         msg = Message([MessageSegment.text(text), MessageSegment.file_image(img_buffer.getvalue())])
-                        await llm_chat.finish(msg)
+                        await llm_chat.send(msg)
                     else:
                         await llm_chat.finish(Message("我哥不在哦，等会再问问吧~"))
                 else:
@@ -52,8 +55,14 @@ async def handle_dm(event: MessageEvent):
                         await get_problem(event, Message(questionId))
         else:
             await llm_chat.finish(Message("好像听不懂呢~"))
+    except FinishedException:
+        logger.debug(f"Chat request finished.")
     except Exception as e:
-        logger.error(f"Failed to get llm response due to {e}")
+        # get trace
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        logger.error(f"Failed to get llm response due to {e} at line {exc_traceback.tb_lineno if exc_traceback else 0}")
+        # log detail
+        logger.error(f"Exception: {e}, exc_type: {exc_type}, exc_value: {exc_value}, exc_traceback: {exc_traceback}")
         await llm_chat.finish(Message("哎哟，信号不好，等下再试试吧~"))
 
 
