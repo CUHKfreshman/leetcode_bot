@@ -68,6 +68,14 @@ class ProblemService {
             return null;
         }
     }
+    async getPaidOnlyProblemsNumberList(): Promise<number[]> {
+        if (!this.leetCodeMetaData) {
+            throw new Error("LeetCode data not loaded");
+        }
+        return this.leetCodeMetaData.stat_status_pairs
+            .filter((problem) => problem.paid_only)
+            .map((problem) => problem.stat.frontend_question_id);
+    }
     async getProblem(frontendQuestionId?: number): Promise<Problem | null> {
         if (!this.leetCodeMetaData) {
             throw new Error("LeetCode data not loaded");

@@ -1,3 +1,4 @@
+import math
 from PIL import Image, ImageDraw, ImageFont 
 from nonebot import get_driver
 from ..other._eval import timeit
@@ -35,7 +36,7 @@ THEME_COLORS = {
         "code": (51, 65, 85)
     }
 }
-@timeit
+#@timeit
 def create_image_from_text(title: str, content: str, language='en',max_width=800, max_height=1000, font_size=20):
     regular_font = ImageFont.truetype(FONT_PATHS[language]["regular"], font_size)
     bold_font = ImageFont.truetype(FONT_PATHS[language]["bold"], font_size)
@@ -48,11 +49,11 @@ def create_image_from_text(title: str, content: str, language='en',max_width=800
     title_height = title_bbox[3] - title_bbox[1]
     # if title width is exceeding max_width, set max_width to title_width
     if title_width > max_width:
-        max_width = title_width + 40
+        max_width = math.ceil(title_width) + 40
     # Calculate the height of image based on content
     lines = image_text_wrap(content, regular_font, max_width - 40, language)
     # not using line_height here because there are extra spaces between lines
-    content_height = len(lines) * (font_size + 5) + title_height
+    content_height = math.ceil(len(lines) * (font_size + 5) + title_height)
     max_height = content_height + 100
 
     # Create a new image with a white background

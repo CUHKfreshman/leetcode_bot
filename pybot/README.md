@@ -33,6 +33,7 @@ LLM_COST_THRESHOLD = # max total cost for this run. If reached, disable LLM serv
 LLM_API_NUM_TRIES = # retry number if no proper response received 
 BOT_NAME='{"rp": "your_roleplay_bot_name_in_poe","solver": "your_solver_bot_name_in_poe"}'
 COST_PER_QUERY='{"rp": number_of_rp_cost,"solver": number_of_solver_cost}'
+DATABASE='pybot.db'
 ```
 ## Documentation
 

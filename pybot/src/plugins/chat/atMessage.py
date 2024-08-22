@@ -15,6 +15,7 @@ llm_chat = on_message(rule=to_me(),priority=10,block=True)
 ALLOWED_TASKS = ["help", "chat", "daily", "每日挑战", "problem","题目",""]
 @llm_chat.handle()
 async def handle_dm(event: MessageEvent):
+    await llm_chat.finish("pong!")
     if LLM_TOTAL_COST > LLM_COST_THRESHOLD:
         logger.warning(f"Total cost {LLM_TOTAL_COST} exceeds threshold {LLM_COST_THRESHOLD}. Chat request suspended.")
         await llm_chat.finish(Message("好累呀，让我摸一会儿鱼，等等再聊天吧~"))

@@ -35,5 +35,13 @@ router.get('/daily-challenge/', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to fetch daily challenge!' });
   }
 });
-
+router.get('/paid-problems/', async (req: Request, res: Response) => {
+    try {
+        const problemService = await ProblemService.getInstance();
+        const problems = await problemService.getPaidOnlyProblemsNumberList();
+        res.json(problems);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch paid problems' });
+    }
+});
 export default router;

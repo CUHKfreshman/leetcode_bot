@@ -8,7 +8,6 @@ from io import BytesIO
 from ...utils import get_llm_response, LLM_TOTAL_COST, LLM_COST_THRESHOLD
 from ..problem import get_daily_challenge
 from ..problem import get_problem
-
 llm_group_chat = on_message(priority=11, block=True)
 @llm_group_chat.handle()
 async def handle_general_chat(event: MessageEvent):
